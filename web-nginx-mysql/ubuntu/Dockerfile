@@ -1,14 +1,19 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial 
 LABEL maintainer "Alexey Pustovalov <alexey.pustovalov@zabbix.com>"
 
-ARG APT_FLAGS_COMMON="-qq -y"
-ARG APT_FLAGS_PERSISTANT="${APT_FLAGS_COMMON} --no-install-recommends"
-ARG APT_FLAGS_DEV="${APT_FLAGS_COMMON} --no-install-recommends"
-ARG DB_TYPE=mysql
-ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive TERM=xterm
+ARG APT_FLAGS_COMMON="-qq -y" 
+ARG APT_FLAGS_PERSISTANT="${APT_FLAGS_COMMON} --no-install-recommends" 
+ARG APT_FLAGS_DEV="${APT_FLAGS_COMMON} --no-install-recommends" 
+ARG DB_TYPE=mysql 
+
+#ENV LANG=C LANGUAGE=en_US:en LC_ALL=C DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get clean && apt-get update && apt-get install -y locales apt-utils && locale-gen && grep -v ^# /etc/locale.gen
+
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive TERM=xterm 
 
 RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CODENAME') && \
-    locale-gen $LC_ALL && \
     echo "#!/bin/sh\nexit 0" > /usr/sbin/policy-rc.d && \
     echo "deb http://us.archive.ubuntu.com/ubuntu/ $DISTRIB_CODENAME multiverse" >> /etc/apt/sources.list && \
     addgroup --system --quiet zabbix && \
@@ -31,23 +36,23 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
             supervisor \
             mysql-client \
             nginx \
-            php5-fpm \
-            php5-mysql \
-            php5-gd \
-            php5-json \
-            php5-ldap \
+            php-fpm \
+            php-mysql \
+            php-gd \
+            php-json \
+            php-ldap \
             ttf-dejavu-core 1>/dev/null && \
     apt-get ${APT_FLAGS_COMMON} autoremove && \
     apt-get ${APT_FLAGS_COMMON} clean && \
-    mkdir -p /var/lib/php5 && \
-    chown --quiet -R www-data:www-data /var/lib/php5 && \
+    mkdir -p /var/lib/php && \
+    chown --quiet -R www-data:www-data /var/lib/php && \
     rm -rf /var/cache/nginx/* && \
     rm -rf /var/lib/apt/lists/*
 
-ARG MAJOR_VERSION=3.4
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
-ARG ZBX_SOURCES=svn://svn.zabbix.com/tags/${ZBX_VERSION}/
-ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE}
+ARG MAJOR_VERSION=4.0 
+ARG ZBX_VERSION=${MAJOR_VERSION} 
+ARG ZBX_SOURCES=svn://svn.zabbix.com/trunk/ 
+ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE} 
 
 ADD conf/tmp/font-config /tmp/font-config
 
@@ -89,10 +94,8 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
     apt-get ${APT_FLAGS_COMMON} clean && \
     rm -rf /var/lib/apt/lists/*
 
-EXPOSE 80/TCP 443/TCP
-
+EXPOSE 80/TCP 443/TCP 
 WORKDIR /usr/share/zabbix
-
 VOLUME ["/etc/ssl/nginx"]
 
 ADD conf/etc/supervisor/ /etc/supervisor/
@@ -100,7 +103,7 @@ ADD conf/etc/zabbix/nginx.conf /etc/zabbix/
 ADD conf/etc/zabbix/nginx_ssl.conf /etc/zabbix/
 ADD conf/etc/zabbix/web/zabbix.conf.php /etc/zabbix/web/
 ADD conf/etc/nginx/nginx.conf /etc/nginx/
-ADD conf/etc/php5/fpm/conf.d/99-zabbix.ini /etc/php5/fpm/conf.d/
+ADD conf/etc/php5/fpm/conf.d/99-zabbix.ini /etc/php/7.0/fpm/conf.d/
 ADD run_zabbix_component.sh /
 
 ENTRYPOINT ["/bin/bash"]
