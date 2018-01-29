@@ -1,10 +1,16 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 LABEL maintainer "Alexey Pustovalov <alexey.pustovalov@zabbix.com>"
 
 ARG APT_FLAGS_COMMON="-qq -y"
 ARG APT_FLAGS_PERSISTANT="${APT_FLAGS_COMMON} --no-install-recommends"
 ARG APT_FLAGS_DEV="${APT_FLAGS_COMMON} --no-install-recommends"
 ARG DB_TYPE=mysql
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get clean && apt-get update && apt-get install -y locales apt-utils 
+
+
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive TERM=xterm
 ENV MIBDIRS=/usr/share/mibs/iana:/usr/share/mibs/ietf:/usr/share/snmp/mibs:/var/lib/zabbix/mibs MIBS=+ALL
 
@@ -38,7 +44,7 @@ RUN locale-gen $LC_ALL && \
             supervisor \
             snmp-mibs-downloader \
             mysql-client \
-            libmysqlclient18 \
+            libmysqlclient20 \
             libiksemel3 \
             libsnmp30 \
             libcurl3 \

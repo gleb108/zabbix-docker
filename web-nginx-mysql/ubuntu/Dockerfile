@@ -9,11 +9,12 @@ ARG DB_TYPE=mysql
 #ENV LANG=C LANGUAGE=en_US:en LC_ALL=C DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get clean && apt-get update && apt-get install -y locales apt-utils && locale-gen && grep -v ^# /etc/locale.gen
+RUN apt-get clean && apt-get update && apt-get install -y locales apt-utils 
 
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive TERM=xterm 
 
 RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CODENAME') && \
+    locale-gen && \
     echo "#!/bin/sh\nexit 0" > /usr/sbin/policy-rc.d && \
     echo "deb http://us.archive.ubuntu.com/ubuntu/ $DISTRIB_CODENAME multiverse" >> /etc/apt/sources.list && \
     addgroup --system --quiet zabbix && \
@@ -49,12 +50,13 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
     rm -rf /var/cache/nginx/* && \
     rm -rf /var/lib/apt/lists/*
 
-ARG MAJOR_VERSION=4.0 
-ARG ZBX_VERSION=${MAJOR_VERSION} 
-ARG ZBX_SOURCES=svn://svn.zabbix.com/trunk/ 
-ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE} 
+#ARG MAJOR_VERSION=4.0 
+#ARG ZBX_VERSION=${MAJOR_VERSION} 
+#ARG ZBX_SOURCES=svn://svn.zabbix.com/trunk/ 
+#ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE} DEBIAN_FRONTEND=noninteractive
 
 ADD conf/tmp/font-config /tmp/font-config
+ADD zabbix /usr/share/zabbix
 
 RUN apt-get ${APT_FLAGS_COMMON} update && \
     apt-get ${APT_FLAGS_DEV} install \
@@ -64,19 +66,9 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
     mkdir -p /var/lib/locales/supported.d/ && \
     echo "en_US.UTF-8 UTF-8" > /var/lib/locales/supported.d/local && \
     echo "ru_RU.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "ja_JP.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "cs_CZ.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "ko_KR.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "it_IT.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "pt_BR.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "sk_SK.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "uk_UA.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "fr_FR.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "pl_PL.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
-    echo "zh_CN.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local && \
     dpkg-reconfigure locales 1>/dev/null && \
-    cd /usr/share/ && \
-    svn --quiet export ${ZBX_SOURCES}/frontends/php/ zabbix 1>/dev/null && \
+#    cd /usr/share/ && \
+#    svn --quiet export ${ZBX_SOURCES}/frontends/php/ zabbix 1>/dev/null && \
     cd /usr/share/zabbix/ && \
     patch -p3 < /tmp/font-config && \
     rm /tmp/font-config && \
