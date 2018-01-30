@@ -42,6 +42,8 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
             php-gd \
             php-json \
             php-ldap \
+            php7.0-bcmath \
+            php7.0-mbstring \
             ttf-dejavu-core 1>/dev/null && \
     apt-get ${APT_FLAGS_COMMON} autoremove && \
     apt-get ${APT_FLAGS_COMMON} clean && \
