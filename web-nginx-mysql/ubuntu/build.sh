@@ -13,9 +13,7 @@ if [[ ! $version =~ ^[0-9]*\.[0-9]*\.[0-9]*$ ]] && [ "$version" != "latest" ]; t
     exit 1
 fi
 
-svn export svn://svn.zabbix.com/trunk/frontends/php/ zabbix
-#Fix version
-sed -i s/3050036/3040000/ zabbix/include/defines.inc.php
+#svn export svn://svn.zabbix.com/trunk/frontends/php/ zabbix
 
 
 docker build -t zabbix-$app_component-$app_database:$os-$version -f Dockerfile .
