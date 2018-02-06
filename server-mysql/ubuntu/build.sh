@@ -13,6 +13,7 @@ if [[ ! $version =~ ^[0-9]*\.[0-9]*\.[0-9]*$ ]] && [ "$version" != "latest" ]; t
     exit 1
 fi
 
+apt-get install -y subversion
 svn --quiet export svn://svn.zabbix.com/tags/3.4.6/ zabbix-3.4.6
 
 docker build -t zabbix-$app_component-$app_database:$os-$version -f Dockerfile .
