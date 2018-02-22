@@ -13,6 +13,8 @@ if [[ ! $version =~ ^[0-9]*\.[0-9]*\.[0-9]*$ ]] && [ "$version" != "latest" ]; t
     exit 1
 fi
 
+svn --quiet export svn://svn.zabbix.com/tags/3.0.14/ zabbix-3.0.14
+
 docker build -t zabbix-$app_component-$app_database:$os-$version -f Dockerfile .
 
 #docker rm -f zabbix-$app_component-$app_database

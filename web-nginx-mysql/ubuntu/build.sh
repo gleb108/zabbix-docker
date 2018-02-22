@@ -13,6 +13,10 @@ if [[ ! $version =~ ^[0-9]*\.[0-9]*\.[0-9]*$ ]] && [ "$version" != "latest" ]; t
     exit 1
 fi
 
+#!!!Download zabbix-3.0.14.tar.gz and unpack it to web-nginx-mysql/ubuntu/zabbix
+#svn export svn://svn.zabbix.com/trunk/frontends/php/ zabbix
+
+
 docker build -t zabbix-$app_component-$app_database:$os-$version -f Dockerfile .
 
 #docker rm -f zabbix-$app_component-$app_database

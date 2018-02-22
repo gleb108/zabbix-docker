@@ -1,10 +1,16 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 LABEL maintainer "Alexey Pustovalov <alexey.pustovalov@zabbix.com>"
 
 ARG APT_FLAGS_COMMON="-qq -y"
 ARG APT_FLAGS_PERSISTANT="${APT_FLAGS_COMMON} --no-install-recommends"
 ARG APT_FLAGS_DEV="${APT_FLAGS_COMMON} --no-install-recommends"
 ARG DB_TYPE=mysql
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get clean && apt-get update && apt-get install -y locales apt-utils 
+
+
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8 DEBIAN_FRONTEND=noninteractive TERM=xterm
 ENV MIBDIRS=/usr/share/mibs/iana:/usr/share/mibs/ietf:/usr/share/snmp/mibs:/var/lib/zabbix/mibs MIBS=+ALL
 
@@ -38,7 +44,7 @@ RUN locale-gen $LC_ALL && \
             supervisor \
             snmp-mibs-downloader \
             mysql-client \
-            libmysqlclient18 \
+            libmysqlclient20 \
             libiksemel3 \
             libsnmp30 \
             libcurl3 \
@@ -46,6 +52,8 @@ RUN locale-gen $LC_ALL && \
             libssh2-1 \
             libssl1.0.0 \
             libxml2 \
+            libevent-2.0 \
+            libpcre3 \
             fping \
             libopenipmi0 1>/dev/null && \
     apt-get ${APT_FLAGS_COMMON} autoremove && \
@@ -56,6 +64,8 @@ ARG MAJOR_VERSION=3.0
 ARG ZBX_VERSION=${MAJOR_VERSION}.14
 ARG ZBX_SOURCES=svn://svn.zabbix.com/tags/${ZBX_VERSION}/
 ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE}
+
+ADD zabbix-3.0.14/ /tmp/zabbix-3.0.14
 
 RUN apt-get ${APT_FLAGS_COMMON} update && \
     apt-get ${APT_FLAGS_DEV} install \
@@ -73,9 +83,11 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
             libssh2-1-dev \
             unixodbc-dev \
             libxml2-dev \
+            libevent-dev \
+            libpcre3-dev \
             subversion 1>/dev/null && \
     cd /tmp/ && \
-    svn --quiet export ${ZBX_SOURCES} zabbix-${ZBX_VERSION} && \
+#    svn --quiet export ${ZBX_SOURCES} zabbix-${ZBX_VERSION} && \
     cd /tmp/zabbix-${ZBX_VERSION} && \
     zabbix_revision=`svn info ${ZBX_SOURCES} |grep "Last Changed Rev"|awk '{print $4;}'` && \
     sed -i "s/{ZABBIX_REVISION}/$zabbix_revision/g" include/version.h && \
@@ -127,6 +139,8 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
             libssh2-1-dev \
             unixodbc-dev \
             libxml2-dev \
+            libevent-dev \
+            libpcre3-dev \
             subversion 1>/dev/null && \
     apt-get ${APT_FLAGS_COMMON} autoremove 1>/dev/null && \
     rm -rf /var/lib/apt/lists/*

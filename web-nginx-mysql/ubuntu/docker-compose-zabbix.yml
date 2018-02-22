@@ -1,0 +1,71 @@
+version: '3.1'
+services:
+ zabbix-server:
+  image: zabbix-server-mysql:ubuntu-latest
+  ports:
+   - "10051:10051"
+#  volumes:
+#   - /etc/localtime:/etc/localtime:ro
+#   - /etc/timezone:/etc/timezone:ro 
+#   - ./zbx_env/usr/lib/zabbix/alertscripts:/usr/lib/zabbix/alertscripts:ro
+#   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:ro
+#   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:ro
+#   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:ro
+#   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:ro
+#   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:ro
+#  volumes_from:
+#   - zabbix-snmptraps:ro
+#  links:
+#   - mysql-server:mysql-server
+#   - zabbix-java-gateway:zabbix-java-gateway
+#   - zabbix-snmptraps:zabbix-snmptraps
+  ulimits:
+   nproc: 65535
+   nofile:
+    soft: 20000
+    hard: 40000
+  env_file:
+   - .env_db_mysql
+   - .env_srv
+  user: root
+  logging:
+    driver: syslog
+    options:
+      syslog-facility: daemon
+      tag: "{{.Name}}/{{.ID}}"
+  labels:
+   com.zabbix.description: "Zabbix server with MySQL database support"
+   com.zabbix.company: "Zabbix SIA"
+   com.zabbix.component: "zabbix-server"
+   com.zabbix.dbtype: "mysql"
+   com.zabbix.os: "ubuntu"
+
+ zabbix-web-nginx-mysql:
+  image: zabbix-web-nginx-mysql:ubuntu-latest
+  ports:
+   - "80:80"
+   - "443:443"
+  links:
+   - mysql-server:mysql-server
+   - zabbix-server:zabbix-server
+#  volumes:
+#   - /etc/localtime:/etc/localtime:ro
+#   - /etc/timezone:/etc/timezone:ro
+#   - ./zbx_env/etc/ssl/nginx:/etc/ssl/nginx:ro
+  env_file:
+   - .env_db_mysql
+   - .env_web
+  user: root
+  logging:
+    driver: syslog
+    options:
+      syslog-facility: daemon
+      tag: "{{.Name}}/{{.ID}}"
+  labels:
+   com.zabbix.description: "Zabbix frontend on Nginx web-server with MySQL database support"
+   com.zabbix.company: "Zabbix SIA"
+   com.zabbix.component: "zabbix-frontend"
+   com.zabbix.webserver: "nginx"
+   com.zabbix.dbtype: "mysql"
+   com.zabbix.os: "ubuntu"
+
