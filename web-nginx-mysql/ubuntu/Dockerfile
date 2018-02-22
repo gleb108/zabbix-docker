@@ -44,6 +44,7 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
             php-ldap \
             php7.0-bcmath \
             php7.0-mbstring \
+            php7.0-xml \
             ttf-dejavu-core 1>/dev/null && \
     apt-get ${APT_FLAGS_COMMON} autoremove && \
     apt-get ${APT_FLAGS_COMMON} clean && \
@@ -57,7 +58,7 @@ RUN DISTRIB_CODENAME=$(/bin/bash -c 'source /etc/lsb-release && echo $DISTRIB_CO
 #ARG ZBX_SOURCES=svn://svn.zabbix.com/trunk/ 
 #ENV ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} DB_TYPE=${DB_TYPE} DEBIAN_FRONTEND=noninteractive
 
-#ADD conf/tmp/font-config /tmp/font-config
+ADD conf/tmp/font-config /tmp/font-config
 ADD zabbix /usr/share/zabbix
 
 RUN apt-get ${APT_FLAGS_COMMON} update && \
@@ -72,14 +73,14 @@ RUN apt-get ${APT_FLAGS_COMMON} update && \
 #    cd /usr/share/ && \
 #    svn --quiet export ${ZBX_SOURCES}/frontends/php/ zabbix 1>/dev/null && \
     cd /usr/share/zabbix/ && \
-#    patch -p3 < /tmp/font-config && \
-#    rm /tmp/font-config && \
-#    rm -f conf/zabbix.conf.php && \
+    patch -p3 < /tmp/font-config && \
+    rm /tmp/font-config && \
+    rm -f conf/zabbix.conf.php && \
 #    rm -rf tests && \
-#    rm /usr/share/zabbix/fonts/DejaVuSans.ttf && \
-#    ./locale/make_mo.sh 2>/dev/null && \
-#    update-alternatives --install /usr/share/zabbix/fonts/graphfont.ttf \
-#            zabbix-frontend-font /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf 10 && \
+    rm /usr/share/zabbix/fonts/DejaVuSans.ttf && \
+     ./locale/make_mo.sh 2>/dev/null && \
+    update-alternatives --install /usr/share/zabbix/fonts/graphfont.ttf \
+            zabbix-frontend-font /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf 10 && \
     apt-get ${APT_FLAGS_COMMON} purge \
             subversion \
             patch \
