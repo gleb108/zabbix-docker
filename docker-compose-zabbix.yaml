@@ -13,6 +13,11 @@ services:
    - .env_db_mysql
    - .env_srv
   user: root
+  logging:
+    driver: syslog
+    options:
+      syslog-facility: daemon
+      tag: "{{.Name}}/{{.ID}}"
   labels:
    com.zabbix.description: "Zabbix server with MySQL database support"
    com.zabbix.company: "Zabbix SIA"
@@ -32,6 +37,11 @@ services:
    - .env_db_mysql
    - .env_web
   user: root
+  logging:
+    driver: syslog
+    options:
+      syslog-facility: daemon
+      tag: "{{.Name}}/{{.ID}}"
   labels:
    com.zabbix.description: "Zabbix frontend on Nginx web-server with MySQL database support"
    com.zabbix.company: "Zabbix SIA"
@@ -39,5 +49,3 @@ services:
    com.zabbix.webserver: "nginx"
    com.zabbix.dbtype: "mysql"
    com.zabbix.os: "ubuntu"
-
-
